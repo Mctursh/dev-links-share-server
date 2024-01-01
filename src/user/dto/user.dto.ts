@@ -16,3 +16,7 @@ export class CreateUserPayload {
     userName: string
 }
 
+export class userPlatforms {
+    platformId: number;
+    link: string
+}

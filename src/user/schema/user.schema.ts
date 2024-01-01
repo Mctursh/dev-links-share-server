@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { HydratedDocument } from "mongoose";
-import { Platform } from "src/platform/schema/platform.schema";
+import { userPlatforms } from "../dto/user.dto";
 
 export type UserDocument = HydratedDocument<User>
 
@@ -25,7 +25,7 @@ export class User {
     profilePicture: string
 
     @Prop()
-    platformIds: number[]
+    userPlatforms: userPlatforms[]
 }
 
 export const UserSchema = SchemaFactory.createForClass(User)

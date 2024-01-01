@@ -8,5 +8,5 @@ export class Platform {
 }
 
 export class CreatePlatformPayload extends Platform {
-    userId: string
+    data: string
 }

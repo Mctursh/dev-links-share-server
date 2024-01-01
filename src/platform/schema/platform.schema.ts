@@ -11,9 +11,6 @@ export class Platform {
     
     @Prop({ required: true })
     name: string
-
-    @Prop({ required: true })
-    link: string
 }
 
 export const PlatformSchema = SchemaFactory.createForClass(Platform)
