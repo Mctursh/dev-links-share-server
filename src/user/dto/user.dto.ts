@@ -16,7 +16,22 @@ export class CreateUserPayload {
     userName: string
 }
 
-export class userPlatforms {
-    platformId: number;
+export class UserPlatforms {
+    id: number;
     link: string
+}
+
+
+export class responseObect {
+    message: string
+    data?: object
+}
+
+export class addPlatformPayload {
+    data: string
+}
+
+export class LoginUserPayload {
+    userName: string
+    password: string
 }
