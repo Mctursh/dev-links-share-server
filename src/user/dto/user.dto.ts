@@ -35,3 +35,10 @@ export class LoginUserPayload {
     userName: string
     password: string
 }
+
+export class updateUserPayload {
+    firstName?: string
+    lastName?: string
+    profilePicture?: string
+    email?: string
+}

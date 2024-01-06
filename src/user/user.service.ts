@@ -4,13 +4,16 @@ import { User, UserDocument } from "./schema/user.schema";
 import { Model } from "mongoose";
 import { ConfigService } from "@nestjs/config";
 import * as bcrypt from 'bcrypt';
-import { CreateUserPayload, LoginUserPayload, UserPlatforms } from "./dto/user.dto";
+import { CreateUserPayload, LoginUserPayload, UserPlatforms, updateUserPayload } from "./dto/user.dto";
+import { CloudinaryService } from "src/cloudinary/cloudinary.service";
+import { UploadApiErrorResponse, UploadApiResponse } from "cloudinary";
 
 @Injectable()
 export class UserService {
     constructor(
         @InjectModel(User.name) private userModel: Model<UserDocument>,
-        private configService: ConfigService
+        private configService: ConfigService,
+        private cloudinaryService: CloudinaryService
         ){}
 
     async createNewUser(createUserPayload: CreateUserPayload): Promise<User> {
@@ -73,4 +76,32 @@ export class UserService {
             throw error
           }        
     }
+
+    async updateUser(
+        userName: string,
+        userData: updateUserPayload,
+        file?: Express.Multer.File
+        ): Promise<User> {
+        try {
+            const user = await this.userModel.findOne({ userName })
+            if (!user) {
+                throw new NotFoundException('User not found')
+            }
+            let response: UploadApiResponse | UploadApiErrorResponse
+            if(file){
+                response = await this.cloudinaryService.uploadImage(file)
+            }
+            user.firstName = userData?.firstName || user.firstName
+            user.lastName = userData?.lastName || user.lastName
+            user.email = userData?.email || user.email
+            if(response){
+                user.profilePicture = response.secure_url
+            }
+            const userOut = await user.save()            
+            return userOut.toObject()
+        } catch (error) {
+            throw error
+        }
+    }
+    
 }

@@ -1,6 +1,8 @@
-import { Body, Controller, Get, HttpException, HttpStatus, Param, Post } from "@nestjs/common";
-import { CreateUserPayload, addPlatformPayload, responseObect, UserPlatforms, LoginUserPayload } from "./dto/user.dto";
+import { Body, Controller, Get, HttpException, HttpStatus, Param, Post, UploadedFile, UseInterceptors } from "@nestjs/common";
+import { CreateUserPayload, addPlatformPayload, responseObect, UserPlatforms, LoginUserPayload, updateUserPayload } from "./dto/user.dto";
 import { UserService } from "./user.service";
+import { FileInterceptor } from "@nestjs/platform-express";
+import { Express } from "express";
 
 
 @Controller('user')
@@ -58,6 +60,21 @@ export class UserController {
         try {
             const { password, ...data } = await this.userService.loginUser(loginUserPayload)
             return { message: 'Login Successful', data }
+        } catch (error) {
+            throw error
+        }
+    }
+
+    @Post('update/:id')
+    @UseInterceptors(FileInterceptor('file'))
+    async updateUser(
+        @Param('id') userName: string,
+        @Body() userData: updateUserPayload,
+        @UploadedFile() file: Express.Multer.File
+        ): Promise<responseObect> {
+        try {
+            const { password, ...data } = await this.userService.updateUser(userName, userData, file)
+            return { message: 'Successfully updated user', data }
         } catch (error) {
             throw error
         }
