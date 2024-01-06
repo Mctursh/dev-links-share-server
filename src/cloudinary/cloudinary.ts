@@ -1,9 +1,7 @@
-// import { Injectable } from '@nestjs/common';
 import { Provider } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { v2 } from 'cloudinary' 
 
-// @Injectable()
 export const Cloudinary: Provider = {
     provide: "Cloudinary",
     useFactory: (configService: ConfigService) => {
