@@ -6,6 +6,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule } from '@nestjs/config';
 import { PlatformModule } from './platform/platform.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -16,7 +17,8 @@ import { CloudinaryModule } from './cloudinary/cloudinary.module';
     UserModule,
     PlatformModule,
     MongooseModule.forRoot(`mongodb+srv://${process.env.MONGO_ADMIN_NAME}:${process.env.MONGO_ADMIN_PASSWORD}@cluster0.4d1r2.mongodb.net/${process.env.DATABASE}?retryWrites=true&w=majority`),
-    CloudinaryModule
+    CloudinaryModule,
+    AuthModule
   ],
   controllers: [AppController],
   providers: [AppService],

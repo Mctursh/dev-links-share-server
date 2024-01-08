@@ -4,16 +4,17 @@ import { User, UserDocument } from "./schema/user.schema";
 import { Model } from "mongoose";
 import { ConfigService } from "@nestjs/config";
 import * as bcrypt from 'bcrypt';
-import { CreateUserPayload, LoginUserPayload, UserPlatforms, updateUserPayload } from "./dto/user.dto";
+import { CreateUserPayload, LoginUserPayload, UserPlatforms, updateUserPayload, userJwtData } from "./dto/user.dto";
 import { CloudinaryService } from "src/cloudinary/cloudinary.service";
 import { UploadApiErrorResponse, UploadApiResponse } from "cloudinary";
-
+import { JwtService } from "@nestjs/jwt";
 @Injectable()
 export class UserService {
     constructor(
         @InjectModel(User.name) private userModel: Model<UserDocument>,
         private configService: ConfigService,
-        private cloudinaryService: CloudinaryService
+        private cloudinaryService: CloudinaryService,
+        private jwtService: JwtService
         ){}
 
     async createNewUser(createUserPayload: CreateUserPayload): Promise<User> {
@@ -64,17 +65,26 @@ export class UserService {
             const foundUser = await this.userModel.findOne({ userName: userData.userName }).lean()
             if (!foundUser) {
               throw new NotFoundException('User not found')
-            } else {
-              const isMatch = await bcrypt.compare(userData.password, foundUser.password)
-              if (!isMatch) {
-                throw new UnauthorizedException('Wrong password')
-              } else {
-                return foundUser
-              }
             }
+
+            const isMatch = await bcrypt.compare(userData.password, foundUser.password)
+            if (!isMatch) {
+              throw new UnauthorizedException('Wrong password')
+            }             
+            return foundUser
+
           } catch (error) {
             throw error
           }        
+    }
+
+    async signUserdataWithJwt(payload: userJwtData): Promise<string> {
+        try {
+            const access_token = await this.jwtService.signAsync(payload)
+            return access_token
+        } catch (error) {
+            throw error
+        }
     }
 
     async updateUser(

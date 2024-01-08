@@ -1,14 +1,15 @@
-import { Body, Controller, Get, HttpException, HttpStatus, Param, Post, UploadedFile, UseInterceptors } from "@nestjs/common";
+import { Body, Controller, Get, HttpException, HttpStatus, Param, Post, Req, Res, UploadedFile, UseGuards, UseInterceptors } from "@nestjs/common";
 import { CreateUserPayload, addPlatformPayload, responseObect, UserPlatforms, LoginUserPayload, updateUserPayload } from "./dto/user.dto";
 import { UserService } from "./user.service";
 import { FileInterceptor } from "@nestjs/platform-express";
-import { Express } from "express";
+import { Express, Request, Response } from "express";
+import { AuthGuard } from "src/auth/auth.guard";
 
 
 @Controller('user')
 export class UserController {
     constructor(
-        private userService: UserService
+        private userService: UserService,
     ) { }
 
     @Post('create')
@@ -25,6 +26,7 @@ export class UserController {
         }
     }
 
+    @UseGuards(AuthGuard)
     @Get(':id')
     async getUser(@Param('id') userName: string): Promise<responseObect> {
         try {
@@ -36,10 +38,10 @@ export class UserController {
             } else {
                 throw new HttpException('Bad request', HttpStatus.BAD_REQUEST)
             }
-        }
-        
+        }        
     }
 
+    @UseGuards(AuthGuard)
     @Post('add-platform/:id')
     async addPlatform(@Param('id') userName: string, @Body() platform: addPlatformPayload): Promise<responseObect> {
         try {
@@ -56,15 +58,22 @@ export class UserController {
     }
 
     @Post('login')
-    async loginUser(@Body() loginUserPayload: LoginUserPayload): Promise<responseObect> {
+    async loginUser(
+            @Body() loginUserPayload: LoginUserPayload,
+            @Res({ passthrough: true }) response: Response,
+        ): Promise<responseObect> {
         try {
             const { password, ...data } = await this.userService.loginUser(loginUserPayload)
-            return { message: 'Login Successful', data }
+            const payload = { sub: data['_id'], userName: data.userName };
+            const token = await this.userService.signUserdataWithJwt(payload)
+            response.cookie('access_token', token, { httpOnly: true,  maxAge: 60 * 60 * 1000, secure: true})
+            return { message: 'Login Successful', data: { ...data, token } }
         } catch (error) {
             throw error
         }
     }
 
+    @UseGuards(AuthGuard)
     @Post('update/:id')
     @UseInterceptors(FileInterceptor('file'))
     async updateUser(

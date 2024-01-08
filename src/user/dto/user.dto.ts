@@ -3,10 +3,11 @@ import { ObjectId } from "mongoose";
 export class User {
     _id: ObjectId
     email: string;
-    hash: string;
+    password: string;
     firstName?: string;
     lastName?: string;
     profilePicture?: string;
+    userName: string;
     platform: Array<string>;
 }
 
@@ -41,4 +42,9 @@ export class updateUserPayload {
     lastName?: string
     profilePicture?: string
     email?: string
+}
+
+export class userJwtData {
+    sub: ObjectId
+    userName: string
 }
